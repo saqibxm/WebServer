@@ -16,6 +16,7 @@ namespace http
 {
 enum class Version
 {
+    Unknown,
     HTTP_0_9,
     HTTP_1_0,
     HTTP_1_1,
@@ -24,11 +25,24 @@ enum class Version
 
 enum class Method
 {
+    Invalid,
     Get,
+    Head,
+    Put,
     Post,
     Patch,
     Update,
+    Connect,
+    Options,
+    Trace,
     Delete
+};
+
+enum class ConnectionType
+{
+    Unknown,
+    Close,
+    KeepAlive
 };
 
 namespace statcodes
@@ -82,6 +96,9 @@ inline namespace utils
 
 std::string to_string(statcodes::Code code);
 std::string to_string(http::Method method);
+std::string to_string(http::ConnectionType type);
+
+Method to_method(std::string);
 
 std::optional<std::string> get_file_contents(const fs::path &);
 std::string get_mime_type(const std::string&);

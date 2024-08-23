@@ -1,6 +1,8 @@
 #include <fstream> // std::ifstream
 #include <iostream> // std::cerr, std::cout
 #include <iomanip> // std::quoted
+#include <cctype>
+#include <algorithm>
 
 #include "Utility.hpp"
 
@@ -70,6 +72,56 @@ std::string http::utils::to_string(http::Method method)
     }
 
     return str;
+}
+
+http::Method http::utils::to_method(std::string method)
+{
+    std::transform(method.cbegin(), method.cend(), method.begin(), [] (decltype(method)::value_type c) {
+        return std::toupper(c);
+    });
+
+    Method m = Method::Invalid;
+
+    if(method == "GET")
+        m = Method::Get;
+    else if(method == "HEAD")
+        m = Method::Head;
+    else if(method == "PUT")
+        m = Method::Put;
+    else if(method == "UPDATE")
+        m = Method::Update;
+    else if(method == "POST")
+        m = Method::Post;
+    else if(method == "PATCH")
+        m = Method::Patch;
+    else if(method == "CONNECT")
+        m = Method::Connect;
+    else if(method == "DELETE")
+        m = Method::Delete;
+    else if(method == "CONNECT")
+        m = Method::Connect;
+    else if(method == "TRACE")
+        m = Method::Trace;
+    else;
+
+    return m;
+}
+
+std::string http::utils::to_string(ConnectionType type)
+{
+    std::string ret;
+
+    switch(type)
+    {
+    case ConnectionType::Close:
+        ret = "close"; break;
+    case ConnectionType::KeepAlive:
+        ret = "Keep-Alive"; break;
+    default:
+        break;
+    }
+
+    return ret;
 }
 
 std::optional<std::string> http::utils::get_file_contents(const fs::path &filename)

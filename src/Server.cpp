@@ -1,4 +1,5 @@
 #include "Server.hpp"
+#include "Request.hpp"
 
 using namespace http;
 
@@ -16,6 +17,14 @@ Server::Server(unsigned short port) : socket(port), root(fs::current_path()), ru
 Server::~Server()
 {
     ;
+}
+
+http::Request Server::GetRequest()
+{
+    auto con = socket.Listen();
+    auto req = con.recv();
+    Request request(req);
+    return request;
 }
 
 bool Server::SetPort(unsigned short port) // untested may not work

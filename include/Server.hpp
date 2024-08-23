@@ -5,13 +5,13 @@
 
 #include "common.h"
 #include "Socket.hpp"
+#include "Request.hpp"
 
 namespace http
 {
 
 constexpr unsigned short HttpPort = 80;
 
-class Request;
 class Response;
 
 class Server
