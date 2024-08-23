@@ -109,15 +109,22 @@ Connection::~Connection()
     ::close(connection);
 }
 
-Connection::Connection(Descriptor fd, SocketAddress addr) : connection(fd), client(std::move(addr)) /*, valid(connection != Invalid)*/
+// Connection::Connection(Descriptor fd, const SocketAddress &addr) : connection(fd), client(std::move(addr)) /*, valid(connection != Invalid)*/
+// {
+//     // without std::moving addr, strange stuff happens (its registered with the fd)
+//     valid = connection != InvalidDescriptor;
+// }
+
+Connection::Connection(Descriptor fd, const SocketAddress &addr) : connection(fd), ip(::inet_ntoa(addr.sin_addr))
 {
-    // without std::moving addr, strange stuff happens (its registered with the fd)
     valid = connection != InvalidDescriptor;
 }
 
-bool Connection::open(Descriptor fd, SocketAddress addr)
+
+bool Connection::open(Descriptor fd, const SocketAddress &addr)
 {
-    client = addr;
+    // client = addr;
+    ip = ::inet_ntoa(addr.sin_addr);
     connection = fd;
     return valid = fd != Invalid;
 }
@@ -141,9 +148,13 @@ std::string Connection::recv()
     return ret;
 }
 
-std::string Connection::get_ipaddr() const
+const std::string& Connection::get_ipaddr() const
 {
+    /*
     char ip[16] = {};
     ::inet_ntop(client.sin_family, &client.sin_addr, ip, std::size(ip));
+    // ::inet_ntoa(client.sin_addr);
     return std::string (ip);
+    */
+    return ip;
 }

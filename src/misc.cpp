@@ -1,4 +1,7 @@
-#include "server.hpp"
+#include "misc.hpp"
+#include "Utility.hpp"
+
+using namespace http;
 
 /*
  * In Object Oriented Terms
@@ -19,105 +22,7 @@
  namespace fs = std::filesystem;
 
 fs::path server_root = fs::current_path();
- 
- enum class HttpVer
- {
-	 HTTP_0_9,
-	 HTTP_1_0,
-	 HTTP_1_1,
-	 HTTP_2_0
- };
- 
- namespace StatusCodes
- {
-	using Error = int;
-	enum Info
-	{
-		Continue = 100,
-		Processing = 102
-	};
-	
-	enum Success
-	{
-		OK = 200,
-		Created = 201,
-		Accepted = 202
-	};
-	
-	enum Redirect
-	{
-		MultipleChoices = 300,
-		MovedPermanently = 301,
-		Found = 302
-	};
-	
-	enum CError
-	{
-		BadRequest = 400,
-		Unauthorized = 401,
-		Forbidden = 403,
-		NotFound = 404,
-		RequestTimeout = 408
-	};
-	
-	enum SError
-	{
-		InternalError = 500,
-		NotImplemented = 501,
-		BadGateway = 502,
-		Unavailable = 503,
-		GatewayTimeout = 504
-	};
-	
-	std::string to_string(Error code)
-	{
-		std::string str;
-		switch(code)
-		{
-		case Info::Continue:
-			str = "Continue"; break;
-		case Info::Processing:
-			str = "Processing"; break;
-			
-		case Success::OK:
-			str = "OK"; break;
-		case Success::Created:
-			str = "Created"; break;
-		case Success::Accepted:
-			str = "Accepted"; break;
-			
-		case Redirect::MultipleChoices:
-			str = "Multiple Choices"; break;
-		case Redirect::MovedPermanently:
-			str = "Moved Permanently"; break;
-		case Redirect::Found:
-			str = "Found"; break;
-			
-		case CError::BadRequest:
-			str = "Bad Request"; break;
-		case CError::Unauthorized:
-			str = "Unauthorized"; break;
-		case CError::Forbidden:
-			str = "Forbidden"; break;
-		case CError::NotFound:
-			str = "Not Found"; break;
-		case CError::RequestTimeout:
-			str = "Request Timeout"; break;
-		}
-		
-		return str;
-	}
- }
 
-
-void sleep_for_ms(unsigned ms)
-{
-#ifdef PLATFORM_POSIX
-	usleep(ms * 1000);
-#else
-	Sleep(ms);
-#endif
-}
 
 std::string CreateResponse(int status, std::string body)
 {
@@ -129,7 +34,7 @@ std::string CreateResponse(int status, std::string body)
 
 	std::string response = "HTTP/1.1";
 	response.append(" " + std::to_string(status));
-	response.append(" " + StatusCodes::to_string(status) + CRLF);
+    response.append(" " + utils::to_string(status) + CRLF);
 	response.append("Connection: Keep-Alive\n");
 	response.append("Content-Type: text/html; charset=utf-8\n");
 	response.append("Keep-Alive: timeout=5, max=10\n");
@@ -157,20 +62,20 @@ std::pair<int, std::string> ProcessRequest(const std::string &request)
 	reqstrm >> method;
 	reqstrm >> path;
 	
-	int code = StatusCodes::NotFound;
+    int code = statcodes::NotFound;
 	std::string body;
 	
 	if(method != "GET")
 	{
 		std::cerr << "Unsupported Method: " << method << '\n';
-		code = StatusCodes::NotImplemented;
+        code = statcodes::NotImplemented;
 	}
 	else
 	{
         if(path == "/") { path.assign("/index.html"); }
 		// path = path.substr(path.find_first_of('/') + 1); // if its npos adding 1 will reset to 0
 		body = GetFileContents(server_root += path);
-		code = body.empty() ? StatusCodes::NotFound : StatusCodes::OK;
+        code = body.empty() ? statcodes::NotFound : statcodes::OK;
 	}
 	
 	return { code, body };
@@ -185,7 +90,7 @@ void Serve(int connection_fd)
   auto [status, body] = ProcessRequest(request);
   std::string response = CreateResponse(status, body);
   send(connection_fd, response.c_str(), response.length(), 0);
-  std::cout << "RESPONSE: " << StatusCodes::to_string(status) << '\n';
+  std::cout << "RESPONSE: " << utils::to_string(status) << '\n';
   // std::cout << "\n--------RESPONSE BEG--------\n" << response.c_str() << "--------RESPONSE END--------\n";
   
   close(connection_fd);
@@ -262,7 +167,7 @@ void serve(std::string root) {
   auto [status, body] = ProcessRequest(request);
   std::string response = CreateResponse(status, body);
   send(connection_fd, response.c_str(), response.length(), 0);
-  std::cout << "RESPONSE: " << StatusCodes::to_string(status) << '\n';
+  std::cout << "RESPONSE: " << utils::to_string(status) << '\n';
   // std::cout << "\n--------RESPONSE BEG--------\n" << response.c_str() << "--------RESPONSE END--------\n";
   
   close(connection_fd);

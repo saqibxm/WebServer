@@ -37,18 +37,19 @@ public:
     Connection();
     ~Connection();
 
-    bool open(Descriptor, SocketAddress);
+    bool open(Descriptor, const SocketAddress&);
     void close();
     bool send(const std::string&);
     std::string recv();
-    std::string get_ipaddr() const;
+    const std::string& get_ipaddr() const;
 
     explicit operator bool() const { return valid; }
 
 private:
-    explicit Connection(Descriptor, SocketAddress);
+    explicit Connection(Descriptor, const SocketAddress&);
     Descriptor connection = InvalidDescriptor;
-    struct sockaddr_in client;
+    // struct sockaddr_in client;
+    std::string ip;
     bool valid;
 };
 

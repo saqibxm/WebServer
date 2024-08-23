@@ -1,7 +1,9 @@
 #include <iostream>
 #include <filesystem>
-#include "server.hpp"
+
+#include "misc.hpp"
 #include "Socket.hpp"
+#include "Utility.hpp"
 
 int main()
 {
@@ -9,15 +11,12 @@ int main()
 
     Socket socket(1337);
 
-    for(int i = 0; i < 5; ++i)
-    {
     auto con = socket.Listen();
 
     std::cout << "Client Connected: " << con.get_ipaddr() << '\n';
     auto request = con.recv();
     std::cout << "\n--------REQUEST BEG--------\n" << request << "\n--------REQUEST END--------\n";
 
-    auto response = CreateResponse(200);
+    auto response = create_dummy_response(200);
     con.send(response);
-    }
 }
