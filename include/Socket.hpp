@@ -41,7 +41,7 @@ public:
     void close();
     bool send(const std::string&);
     std::string recv();
-    const std::string& get_ipaddr() const;
+    const std::string& ipaddr() const;
 
     explicit operator bool() const { return valid; }
 
@@ -59,6 +59,9 @@ class Socket
     static constexpr unsigned short DefaultPort = 1337;
     static constexpr int SOCKADDR_SZ = sizeof(struct sockaddr);
     static constexpr int MAX_CONNECTION = 5;
+    using NetworkPortType = in_port_t;
+    using CommonPortType = unsigned short;
+
 public:
     // Socket();
     Socket(unsigned short = DefaultPort);
@@ -73,14 +76,20 @@ public:
 
     Connection Listen();
     // Connection Accept();
-    std::optional<Connection> ListenNonBlock();
+    std::optional<Connection> ListenNonBlock(); // Not implemented
 
-    std::string IpAddr();
+    std::string IpAddr() const;
+    bool Opened() const;
+    bool Switch(unsigned short);
+
+    CommonPortType Port() const;
 
 private:
     Descriptor file_descriptor;
     int reuse = 1;
     unsigned short port;
+
+    bool valid;
 
     struct sockaddr_in server_addr;
     struct sockaddr_in client_addr;

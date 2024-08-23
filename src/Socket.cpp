@@ -23,9 +23,13 @@ Socket::Socket(unsigned short portnum) : file_descriptor(-1), port(portnum)
     assert(file_descriptor >= 0);
 
     auto ret = setsockopt(file_descriptor, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
-    assert(ret >= 0);
+    if(ret < 0) {
+        valid = false;
+        std::cerr << "Socket Intitialization Failed\n";
+    }
 
     auto success = Setup();
+    valid = success;
     if(!success) std::cerr << "Socket Setup Failed: Unable to Bind!\n";
 }
 
@@ -61,7 +65,13 @@ bool Socket::Setup()
 
     auto ret = ::bind(file_descriptor, (const sockaddr*)&server_addr, sizeof(server_addr));
 
-    std::cout << "Server Started at Port: " << port << std::endl;
+    if(ret != 0) {
+        valid = false;
+        std::cerr << "Server cannot be started at port " << port << '\n';
+    }
+    else
+        std::cout << "Server Started at Port: " << port << std::endl;
+
     return ret == 0;
 }
 
@@ -95,6 +105,33 @@ bool Socket::Send(const std::string &)
 std::string Socket::Receive()
 {
     // Not Implemented
+}
+
+bool Socket::Opened() const
+{
+    return valid;
+}
+
+std::string Socket::IpAddr() const
+{
+    if(server_addr.sin_addr.s_addr == INADDR_ANY) return "LOCALHOST";
+
+    char ip[16] = {};
+    ::inet_ntop(server_addr.sin_family, &server_addr.sin_addr, ip, (socklen_t) std::size(ip));
+    return ip;
+}
+
+bool Socket::Switch(unsigned short newport)
+{
+    port = newport;
+    auto success = Setup();
+
+    return valid = success;
+}
+
+Socket::CommonPortType Socket::Port() const
+{
+    return port;
 }
 
 /* Connection */
@@ -148,7 +185,7 @@ std::string Connection::recv()
     return ret;
 }
 
-const std::string& Connection::get_ipaddr() const
+const std::string& Connection::ipaddr() const
 {
     /*
     char ip[16] = {};

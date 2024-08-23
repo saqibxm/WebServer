@@ -6,6 +6,7 @@
 #include <string>
 #include <optional>
 #include <type_traits>
+#include <map>
 
 #include "bimap.hpp"
 #include "common.h"
@@ -83,10 +84,13 @@ std::string to_string(statcodes::Code code);
 std::string to_string(http::Method method);
 
 std::optional<std::string> get_file_contents(const fs::path &);
+std::string get_mime_type(const std::string&);
+std::string get_mime_type(const fs::path&); // requires full filename / path
 
 } /* utils */
 
 extern const stde::bimap<Version, std::string> http_versions;
+extern const std::map<std::string_view, std::string> mime_types;
 } /* http */
 
 inline void sleep_for_ms(unsigned ms)

@@ -83,6 +83,22 @@ std::optional<std::string> http::utils::get_file_contents(const fs::path &filena
     return ret;
 }
 
+std::string http::get_mime_type(const std::string &extension)
+{
+    auto it = mime_types.find(extension);
+    if(it == mime_types.end()) return "unknown/???";
+
+    return it->second;
+}
+
+std::string http::get_mime_type(const fs::path &filename)
+{
+    auto extension = filename.extension().string();
+    extension = extension.substr(extension.find('.') + 1);
+
+    return get_mime_type(extension);
+}
+
 std::string create_dummy_response(int status, std::string body)
 {
     /*
@@ -108,4 +124,37 @@ const stde::bimap<http::Version, std::string> http::http_versions = {
     { Version::HTTP_1_0, "HTTP/1.0" },
     { Version::HTTP_1_1, "HTTP/1.1" },
     { Version::HTTP_2_0, "HTTP/2.0" }
+};
+
+const std::map<std::string_view, std::string> http::mime_types = {
+    { "", "text/html" }, // default no-extension
+    { "txt", "text/plain" },
+    { "html", "text/html" },
+    { "css", "text/css" },
+    { "csv", "text/csv" },
+    { "js", "text/javascript" },
+    { "json", "text/json" },
+
+    { "jpg", "image/jpeg" },
+    { "jpeg", "image/jpeg" },
+    { "png", "image/png", },
+    { "bmp", "image/bmp" },
+    { "gif", "image/gif" },
+    { "webp", "image/webp" },
+    { "ico", "image/vnd.microsoft.icon" },
+
+    { "mp3", "audio/mpeg" },
+    { "aac", "audio/aac" },
+    { "opus", "audio/ogg" },
+
+    { "mp4", "video/mp4" },
+    { "mpeg", "video/mpeg" },
+
+    { "ttf", "font/ttf" },
+    { "xxx", "font/xxx" },
+
+    { "zip", "application/zip" },
+    { "pdf", "application/pdf" },
+    { "rar", "application/vnd.rar" },
+    { "bin", "application/octet-stream" }
 };

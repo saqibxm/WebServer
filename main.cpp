@@ -13,7 +13,9 @@ int main()
 
     auto con = socket.Listen();
 
-    std::cout << "Client Connected: " << con.get_ipaddr() << '\n';
+    if(!con) throw std::runtime_error("Invalid Connection");
+
+    std::cout << "Client Connected: " << con.ipaddr() << '\n';
     auto request = con.recv();
     std::cout << "\n--------REQUEST BEG--------\n" << request << "\n--------REQUEST END--------\n";
 

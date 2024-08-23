@@ -9,6 +9,8 @@
 namespace http
 {
 
+constexpr unsigned short HttpPort = 80;
+
 class Request;
 class Response;
 
@@ -23,12 +25,12 @@ public:
     bool SendResponse(const Response&);
 
     /*
-     * Request Require();
+     * Request Required();
      * bool Respond(const Response&);
      */
 
-    void SetRoot(const std::string&);
-    void SetPort(unsigned short);
+    void SetRoot(const fs::path&);
+    bool SetPort(unsigned short);
 
 private:
     Socket socket;
