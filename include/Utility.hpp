@@ -42,6 +42,7 @@ enum class ConnectionType
 {
     Unknown,
     Close,
+    Reuse,
     KeepAlive
 };
 
@@ -99,6 +100,7 @@ std::string to_string(http::Method method);
 std::string to_string(http::ConnectionType type);
 
 Method to_method(std::string);
+ConnectionType to_connection(std::string);
 
 std::optional<std::string> get_file_contents(const fs::path &);
 std::string get_mime_type(const std::string&);

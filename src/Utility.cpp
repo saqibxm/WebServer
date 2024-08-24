@@ -115,12 +115,29 @@ std::string http::utils::to_string(ConnectionType type)
     {
     case ConnectionType::Close:
         ret = "close"; break;
+    case ConnectionType::Reuse:
+        ret = "reuse"; break;
     case ConnectionType::KeepAlive:
-        ret = "Keep-Alive"; break;
+        ret = "keep-alive"; break;
     default:
         break;
     }
 
+    return ret;
+}
+
+http::ConnectionType http::utils::to_connection(std::string connection)
+{
+    ConnectionType ret = ConnectionType::Unknown;
+    std::transform(connection.cbegin(), connection.cend(), connection.begin(),
+    [] (decltype(connection)::value_type c) {
+        return std::tolower(c);
+    });
+
+    if(connection == "keep-alive") ret = ConnectionType::KeepAlive;
+    else if(connection == "reuse") ret = ConnectionType::Reuse;
+    else if(connection == "close") ret = ConnectionType::Close;
+    else;
     return ret;
 }
 
@@ -162,7 +179,7 @@ std::string create_dummy_response(int status, std::string body)
     std::string response = "HTTP/1.1";
     response.append(" " + std::to_string(status));
     response.append(" " + utils::to_string(status) + CRLF);
-    response.append("Connection: Keep-Alive\n");
+    response.append("Connection: keep-alive\n");
     response.append("Content-Type: text/html; charset=utf-8\n");
     response.append("Keep-Alive: timeout=5, max=10\n");
     if(!response.empty()) response.append(body);
@@ -180,6 +197,8 @@ const stde::bimap<http::Version, std::string> http::http_versions = {
 
 const std::map<std::string_view, std::string> http::mime_types = {
     { "", "text/html" }, // default no-extension
+    { "any", "*/*" }, // subject to change
+
     { "txt", "text/plain" },
     { "html", "text/html" },
     { "css", "text/css" },

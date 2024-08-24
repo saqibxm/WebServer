@@ -38,6 +38,7 @@ private:
     bool running;
 
     static void ServerThread(Server *const);
+    // std::queue<Connection> connections; // A queue for connections fetched by ServerThread
 };
 
 }

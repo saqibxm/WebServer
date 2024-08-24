@@ -23,6 +23,8 @@ add_executable(WebServer main.cpp
     ${HEADERS}
     include/Request.hpp
     src/Request.cpp
+    include/Parser.hpp
+    src/Parser.cpp
 )
 
 include(GNUInstallDirs)

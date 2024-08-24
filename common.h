@@ -26,6 +26,8 @@
 #define LF '\n'
 #define CRLF "\r\n"
 
+#define WS ' '
+
 namespace fs = std::filesystem;
 namespace crn = std::chrono;
 
