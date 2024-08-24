@@ -2,6 +2,8 @@
 #include "Parser.hpp"
 #include <charconv>
 #include <array>
+#include <iostream>
+#include <regex>
 
 using namespace http;
 
@@ -26,7 +28,7 @@ void Request::clear()
     host.clear();
 }
 
-std::pair<std::string, unsigned short> Request::getHostName() const
+std::pair<std::string, unsigned short> Request::get_hostname() const
 {
     auto sep = host.find(':') + 1;
     unsigned short port = 0;
@@ -36,33 +38,33 @@ std::pair<std::string, unsigned short> Request::getHostName() const
     return { host.substr(0, sep - 1), port};
 }
 
-const std::vector<std::string>& Request::getMimes() const
+const std::vector<std::string>& Request::get_mimes() const
 {
     return mimes;
 }
 
-http::Method Request::getMethod() const
+http::Method Request::get_method() const
 {
     return method;
 }
 
-std::string Request::getFileName() const
+std::string Request::get_filename() const
 {
     if(!uri.has_filename()) return "/";
     return uri.filename();
 }
 
-http::Version Request::getVersion() const
+http::Version Request::get_version() const
 {
     return version;
 }
 
-http::ConnectionType Request::getConnectionType() const
+http::ConnectionType Request::get_contype() const
 {
     return conn;
 }
 
-const std::string& Request::getPlain() const
+const std::string& Request::get_plaintext() const
 {
     return plain;
 }
@@ -96,13 +98,19 @@ void Request::parse()
     uri = Parser::parse_uri(plain);
     version = Parser::parse_version(plain);
 
-    if(method == Method::Invalid) valid = false;
-    host = Parser::parse_hostname(plain).value_or("Unknown:???");
+    if(method == Method::Invalid) throw std::domain_error("Possibly Missing Request Line!");
+    // host = Parser::parse_hostname(plain).value_or("Unknown:???");
 
     parse_headers();
     if(auto it = headers.find("Connection"); it != headers.end())
         conn = http::utils::to_connection(it->second);
     else conn = ConnectionType::Close;
+
+    if(auto it = headers.find("Host"); it != headers.end())
+        host = it->second;
+    else host = "Unknown:???";
+
+    parse_mimes();
 }
 
 void Request::parse_headers()
@@ -128,9 +136,21 @@ void Request::parse_mimes()
 {
     if(!valid || headers.empty()) throw std::invalid_argument("Request is Invalid or Headers are not Processed");
 
+    // for pattern explaination visit regex101.com and paste this pattern alongwith sample
+    // R"(((?:[a-z]{4,12}|\*)\/(?:\*|[^,;]{3,15}))[,;\s]?)";
+    static const std::string mime_pattern = R"(((?:[a-z]{4,12}|\*)\/(?:\*|[^,;]{3,15})))";
+    static std::regex mime_regex(mime_pattern, std::regex::ECMAScript | std::regex::icase | std::regex::optimize);
+
     if(!headers.count("Accept")) return; // no mimes found in headers
+    std::smatch match;
     for(auto [beg, end] = headers.equal_range("Accept"); beg != end; ++beg)
     {
+        const std::string &mimes = beg->second;
+        for(std::sregex_iterator it(mimes.begin(), mimes.end(), mime_regex), it_end;
+            it != it_end; ++it)
+        {
+            this->mimes.push_back(it->str());
+        }
     }
 }
 
@@ -144,3 +164,12 @@ std::ostream& http::operator << (std::ostream &os, const Request &obj)
     os.clear(old_state);
     return os;
 }
+
+/*
+    std::string::size_type start = 0, current = 0;
+    while((current = mimes.find(';', current)) != std::string::npos)
+    {
+        std::string line(mimes, start, current - start);
+
+    }
+*/

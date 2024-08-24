@@ -8,23 +8,26 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(
     HEADERS
     common.h
-    external/bimap.hpp include/Socket.hpp include/Utility.hpp include/Server.hpp
-    external/tl/expected.hpp
+    external/bimap.hpp external/tl/expected.hpp
+    include/Socket.hpp
+    include/Utility.hpp
+    include/Server.hpp
+    include/Request.hpp
+    include/Parser.hpp
 )
 
 set(
     SOURCES
-    src/Socket.cpp src/Utility.cpp
+    src/Socket.cpp
+    src/Utility.cpp
     src/Server.cpp
+    src/Request.cpp
+    src/Parser.cpp
 )
 
 add_executable(WebServer main.cpp
     ${SOURCES}
     ${HEADERS}
-    include/Request.hpp
-    src/Request.cpp
-    include/Parser.hpp
-    src/Parser.cpp
 )
 
 include(GNUInstallDirs)

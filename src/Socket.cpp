@@ -105,6 +105,7 @@ bool Socket::Send(const std::string &)
 std::string Socket::Receive()
 {
     // Not Implemented
+    return "Not Implemented";
 }
 
 bool Socket::Opened() const

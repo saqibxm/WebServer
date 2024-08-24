@@ -19,13 +19,13 @@ public:
     void create(const std::string&);
     void clear(); // reset everything
 
-    std::pair<std::string, unsigned short> getHostName() const;
-    http::Method getMethod() const;
-    std::string getFileName() const;
-    http::Version getVersion() const;
-    http::ConnectionType getConnectionType() const;
-    const std::vector<std::string>& getMimes() const;
-    const std::string& getPlain() const;
+    std::pair<std::string, unsigned short> get_hostname() const;
+    http::Method get_method() const;
+    std::string get_filename() const;
+    http::Version get_version() const;
+    http::ConnectionType get_contype() const;
+    const std::vector<std::string>& get_mimes() const;
+    const std::string& get_plaintext() const;
 
     std::ostream& print(std::ostream&) const;
 
